@@ -56,11 +56,13 @@
       var queryString = window.location.search;
       queryString = queryString.substring(1);
       console.log("Query String:", queryString);
+
+      const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+
     
       // Build WebSocket URL
       const wsUrl = 
-        'ws://' +
-        window.location.host +
+        protocol + window.location.host +
         '/ws/stock/' +
         roomName +
         '/?' +  // Combine "/" and "?" into one string
