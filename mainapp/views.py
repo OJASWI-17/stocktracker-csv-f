@@ -1,10 +1,17 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http.response import HttpResponse
 
 from django.http import JsonResponse
 import pandas as pd
 from .tasks import update_stock
 from asgiref.sync import sync_to_async
+
+
+from django.contrib import messages
+from django.contrib.auth import authenticate, login as auth_login
+
+from django.contrib.auth.models import User
+
 
 # Path to CSV file
 CSV_FILE_PATH = "C:/projects/stocktracker/stockproject/mainapp/generated_stock_data.csv"
@@ -45,7 +52,11 @@ def get_stock_updates(selected_stocks):
 
     return data
 
-def stockPicker(request):
+async def stockPicker(request):
+    is_loginned = await checkAuthenticated(request)
+    if not is_loginned:
+        return HttpResponse("Login First")
+    
     """View to display available stocks for selection."""
     stock_picker = df["ticker"].unique().tolist()
     return render(request, "mainapp/stockpicker.html", {"stock_picker": stock_picker})
@@ -72,4 +83,52 @@ async def stockTracker(request):
     update_stock.delay(selected_stocks)
 
     return render(request, "mainapp/stocktracker.html", {"room_name": "track", "data": initial_data})
+
+
+
+
+
+
+
+def register(request):
+    if request.method == "POST":
+        
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists")
+            return redirect("register")
+
+        # Create user (password will be hashed)
+        user = User.objects.create_user(
+            username=username,
+            password=password
+        )
+
+        messages.success(request, "Account created successfully")
+        return redirect("login")
+
+    return render(request, "mainapp/register.html")
+
+
+
+
+def login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            messages.error(request, "Invalid username or password")
+            return redirect("login")
+
+        auth_login(request, user)
+        messages.success(request, "Logged in successfully")
+        return redirect("stockpicker") 
+
+    return render(request, "mainapp/login.html")
 
