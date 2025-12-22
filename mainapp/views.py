@@ -11,6 +11,8 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login
 
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
 
 
 # Path to CSV file
@@ -52,37 +54,31 @@ def get_stock_updates(selected_stocks):
 
     return data
 
-async def stockPicker(request):
-    is_loginned = await checkAuthenticated(request)
-    if not is_loginned:
-        return HttpResponse("Login First")
-    
-    """View to display available stocks for selection."""
+
+@login_required(login_url="login")
+def stockPicker(request):
     stock_picker = df["ticker"].unique().tolist()
     return render(request, "mainapp/stockpicker.html", {"stock_picker": stock_picker})
 
 
-@sync_to_async
-def checkAuthenticated(request):
-    return bool(request.user.is_authenticated)
+
+
     
-async def stockTracker(request):
-    is_loginned = await checkAuthenticated(request)
-    if not is_loginned:
-        return HttpResponse("Login First")
-    """View to fetch initial stock data and trigger Celery updates."""
+@login_required(login_url="login")
+def stockTracker(request):
     selected_stocks = request.GET.getlist("stock_picker")
 
     if not selected_stocks:
         return JsonResponse({"error": "No stocks selected"}, status=400)
 
-    # Fetch initial stock data to send to frontend
     initial_data = get_stock_updates(selected_stocks)
-
-    # Start Celery task for periodic updates
     update_stock.delay(selected_stocks)
 
-    return render(request, "mainapp/stocktracker.html", {"room_name": "track", "data": initial_data})
+    return render(
+        request,
+        "mainapp/stocktracker.html",
+        {"room_name": "track", "data": initial_data}
+    )
 
 
 
