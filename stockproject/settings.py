@@ -28,8 +28,9 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = [
-    "https://stocktracker.onrender.com",
+    "https://*.onrender.com",
 ]
+
 
 
 
