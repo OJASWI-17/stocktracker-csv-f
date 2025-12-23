@@ -49,7 +49,7 @@ msgpack==1.1.0
 multitasking==0.0.11
 numpy==2.2.2
 pandas==2.2.3
-pandas-ta==0.3.14b
+pandas_ta==0.3.14b0
 parse==1.20.2
 peewee==3.17.9
 platformdirs==4.3.6
