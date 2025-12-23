@@ -83,9 +83,23 @@ from channels.layers import get_channel_layer
 import asyncio
 from mainapp.models import StockDetail
 
-# Path to CSV file
-CSV_FILE_PATH = "C:/projects/stocktracker/stockproject/mainapp/generated_stock_data.csv"
+
+
+import os
+import pandas as pd
+from django.conf import settings
+
+CSV_FILE_PATH = os.path.join(
+    settings.BASE_DIR,
+    "mainapp",
+    "generated_stock_data.csv"
+)
+
 df = pd.read_csv(CSV_FILE_PATH)
+
+# # Path to CSV file
+# CSV_FILE_PATH = "C:/projects/stocktracker/stockproject/mainapp/generated_stock_data.csv"
+# df = pd.read_csv(CSV_FILE_PATH)
 
 # Dictionary to track current index for each stock in the CSV
 stock_indices = {ticker: 0 for ticker in df["ticker"].unique()}
