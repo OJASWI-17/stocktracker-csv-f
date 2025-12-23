@@ -13,13 +13,24 @@ from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
+import os
+import pandas as pd
+from django.conf import settings
 
+CSV_FILE_PATH = os.path.join(
+    settings.BASE_DIR,
+    "mainapp",
+    "generated_stock_data.csv"
+)
 
-# Path to CSV file
-CSV_FILE_PATH = "C:/projects/stocktracker/stockproject/mainapp/generated_stock_data.csv"
-
-# Load CSV into a DataFrame
 df = pd.read_csv(CSV_FILE_PATH)
+
+
+# # Path to CSV file
+# CSV_FILE_PATH = "C:/projects/stocktracker/stockproject/mainapp/generated_stock_data.csv"
+
+# # Load CSV into a DataFrame
+# df = pd.read_csv(CSV_FILE_PATH)
 
 # Dictionary to store current index for each stock
 stock_indices = {ticker: 0 for ticker in df["ticker"].unique()}
