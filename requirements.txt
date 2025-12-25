@@ -89,3 +89,9 @@ yahoo-fin==0.8.9.1
 yfinance==0.2.52
 zipp==3.21.0
 zope.interface==7.2
+
+# 🔥 REQUIRED FOR POSTGRES (FIX)
+psycopg[binary]
+
+# 🔥 REQUIRED FOR DATABASE_URL PARSING
+dj-database-url
