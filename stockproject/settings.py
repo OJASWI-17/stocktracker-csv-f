@@ -24,13 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.onrender.com",
-]
 
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = ["http://localhost",
+    "http://127.0.0.1",
+    "https://*.up.railway.app",]
 
 
 
@@ -86,8 +88,12 @@ ASGI_APPLICATION = 'stockproject.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
@@ -149,22 +155,49 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 
 # celery settings
-CELERY_BROKER_URL = os.environ.get("REDIS_URL")
-accept_content= ['application/json'] 
-result_serializer = 'json'
-task_serializer = 'json'
-timezone = 'Asia/Kolkata'
-result_backend = 'django-db'# at which place the result will be stored 
+# CELERY_BROKER_URL = os.environ.get("REDIS_URL")
+# accept_content= ['application/json'] 
+# result_serializer = 'json'
+# task_serializer = 'json'
+# timezone = 'Asia/Kolkata'
+# result_backend = 'django-db'# at which place the result will be stored 
 
+# broker_connection_retry_on_startup = True
+
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [os.environ.get("REDIS_URL")],
+#         },
+#     },
+# }
+
+
+
+
+REDIS_URL = os.getenv("REDIS_URL")
+
+# Celery
+CELERY_BROKER_URL = REDIS_URL
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"
+
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 broker_connection_retry_on_startup = True
 
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-
+# Channels
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [os.environ.get("REDIS_URL")],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [REDIS_URL],
         },
     },
 }
